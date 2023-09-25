@@ -52,6 +52,43 @@ class User {
       );
   }
 
+  getCart() {
+    const db = getDb();
+    // We are getting access to all the productIds from the cart
+    const productIds = this.cart.items.map(i => {
+      return i.productId;
+    });
+    // We are finding all the products for whom the _id is among the ids in the productIds array
+    return db
+      .collection('products')
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then(products => {
+        return products.map(p => {
+          return {
+            ...p,
+            quantity: this.cart.items.find(i => {
+              return i.productId.toString() === p._id.toString();
+            }).quantity
+            // finding the product from cart and returning its quantity
+          }
+        });
+      });
+  }
+
+  deleteItemFromCart(productId){
+    const updatedCartItems=this.cart.items.filter(item=>{
+      // remove the item for which the productId matches
+      return item.productId.toString() !== productId.toString();
+    });
+    const db = getDb();
+    return db
+      .collection('users')
+      .updateOne(
+        { _id: new ObjectId(this._id) },
+        { $set: { cart: {items: updatedCartItems} } }
+      );
+  }
 
   static findById(userId) {
     const db = getDb();
