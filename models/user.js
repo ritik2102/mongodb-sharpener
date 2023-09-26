@@ -76,8 +76,8 @@ class User {
       });
   }
 
-  deleteItemFromCart(productId){
-    const updatedCartItems=this.cart.items.filter(item=>{
+  deleteItemFromCart(productId) {
+    const updatedCartItems = this.cart.items.filter(item => {
       // remove the item for which the productId matches
       return item.productId.toString() !== productId.toString();
     });
@@ -86,8 +86,49 @@ class User {
       .collection('users')
       .updateOne(
         { _id: new ObjectId(this._id) },
-        { $set: { cart: {items: updatedCartItems} } }
+        { $set: { cart: { items: updatedCartItems } } }
       );
+  }
+
+  // We will get the cart items, user info 
+  // add this info into an object and save it into a collection called orders
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then(products => {
+        // creating order object with the products recieved from the cart
+        const order = {
+          items: products,
+          user: {
+            _id: new ObjectId(this._id),
+            name: this.name
+          }
+        };
+        return db
+          .collection('orders')
+          .insertOne(order)
+      })
+      .then(result => {
+        // When the order succeeds, we set our cart again as an object with an empty array
+        // updating the cart in user object
+        this.cart = { items: [] };
+        return db
+          .collection('users')
+          .updateOne(
+            // updating the cart in database
+            { _id: new ObjectId(this._id) },
+            { $set: { cart: { items: [] } } }
+          );
+      });
+  }
+
+  // getting the orders
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection('orders')
+      .find({ 'user._id': new ObjectId(this._id) })
+      .toArray();
   }
 
   static findById(userId) {
