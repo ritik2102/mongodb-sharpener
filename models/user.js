@@ -24,6 +24,32 @@ const userSchema = new Schema({
     }
 });
 
+// methods is used to add a method to our schema
+userSchema.methods.addToCart = function (product) {
+    const cartProductIndex = this.cart.items.findIndex(cp => {
+        return cp.productId.toString() === product._id.toString();
+    });
+    // newQuantity is 1 if the product is not present in cart
+    let newQuantity = 1;
+    // getting access to the cart 
+    const updatedCartItems = [...this.cart.items];
+    // cartProductIndex will be >=0 only if the product exists in cart
+    if (cartProductIndex >= 0) {
+        newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+        // updating the quantity for our product
+        updatedCartItems[cartProductIndex].quantity = newQuantity;
+    } else {
+        updatedCartItems.push({
+            productId: product._id,
+            quantity: newQuantity
+        });
+    }
+    const updatedCart = {
+        items: updatedCartItems
+    };
+    this.cart=updatedCart;
+    return this.save();
+}
 // exporting our model
 module.exports = mongoose.model('User', userSchema);
 

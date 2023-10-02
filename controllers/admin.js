@@ -87,7 +87,7 @@ exports.getProducts = (req, res, next) => {
     // .select('title price -_id')
     // populate allows you to tell mongoose to populate a certain field with all the detailed information and not just the id
     // we will get full user information and not just the userId
-    // .populate('userId', 'name')
+    // .populate('userId')
     .then(products => {
       res.render('admin/products', {
         prods: products,
