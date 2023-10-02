@@ -21,6 +21,13 @@ const productSchema= new Schema({
   imageUrl:{ 
     type: String,
     required: true
+  },
+  userId:{
+    type: Schema.Types.ObjectId,
+    // We are creating a relationship here
+    // refer to the user model
+    ref: 'User',
+    required: true
   }
 });
 

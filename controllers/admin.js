@@ -13,11 +13,13 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+  
   const product = new Product({
     title: title,
     price: price,
     description: description,
-    imageUrl: imageUrl
+    imageUrl: imageUrl,
+    userId: req.user._id
   });
 
   // the save method below is coming from mongoose
@@ -77,9 +79,15 @@ exports.postEditProduct = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
+// select allows us to define the fields we want to select and unselect
 exports.getProducts = (req, res, next) => {
   Product
     .find()
+    // will select the title and price and will ignore the _id
+    // .select('title price -_id')
+    // populate allows you to tell mongoose to populate a certain field with all the detailed information and not just the id
+    // we will get full user information and not just the userId
+    // .populate('userId', 'name')
     .then(products => {
       res.render('admin/products', {
         prods: products,
